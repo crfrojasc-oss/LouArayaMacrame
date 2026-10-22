@@ -13,16 +13,16 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val LightColorScheme = lightColorScheme(
-    primary = TerracottaPrimary,
-    onPrimary = CreamBackground,
-    primaryContainer = SoftRose,
-    onPrimaryContainer = TerracottaDark,
-    secondary = EarthenBrown,
-    onSecondary = CreamBackground,
+    primary = PurplePrimary,
+    onPrimary = Color.White,
+    primaryContainer = PurpleSurface,
+    onPrimaryContainer = PurpleDark,
+    secondary = TerracottaPrimary,
+    onSecondary = Color.White,
     secondaryContainer = CreamSurface,
-    onSecondaryContainer = WoodWarm,
+    onSecondaryContainer = TerracottaDark,
     tertiary = SageGreen,
-    onTertiary = CreamBackground,
+    onTertiary = Color.White,
     tertiaryContainer = SageGreenLight,
     onTertiaryContainer = CharcoalText,
     background = CreamBackground,
@@ -30,19 +30,20 @@ private val LightColorScheme = lightColorScheme(
     surface = CreamCard,
     onSurface = CharcoalText,
     surfaceVariant = CreamSurface,
-    onSurfaceVariant = MutedText
+    onSurfaceVariant = MutedText,
+    outline = PurpleBorder
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = TerracottaLight,
+    primary = PurpleLight,
     onPrimary = CharcoalText,
-    primaryContainer = TerracottaDark,
-    onPrimaryContainer = CreamBackground,
-    secondary = EarthenBrown,
-    onSecondary = CreamBackground,
+    primaryContainer = PurpleDark,
+    onPrimaryContainer = PurpleSurface,
+    secondary = TerracottaLight,
+    onSecondary = CharcoalText,
     background = CharcoalText,
     onBackground = CreamBackground,
-    surface = Color(0xFF383230),
+    surface = Color(0xFF282030),
     onSurface = CreamBackground
 )
 

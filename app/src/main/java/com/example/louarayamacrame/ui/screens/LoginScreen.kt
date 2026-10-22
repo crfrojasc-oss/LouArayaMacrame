@@ -69,9 +69,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.louarayamacrame.model.UserProfile
 import com.example.louarayamacrame.model.UserRole
-import com.example.louarayamacrame.ui.theme.EarthenBrown
-import com.example.louarayamacrame.ui.theme.TerracottaDark
-import com.example.louarayamacrame.ui.theme.TerracottaPrimary
+import com.example.louarayamacrame.ui.theme.PurpleDark
+import com.example.louarayamacrame.ui.theme.PurplePrimary
 import com.example.louarayamacrame.ui.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,7 +96,7 @@ fun LoginScreen(
                     Text(
                         text = "Inicio de Sesión",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        fontSize = 17.sp
                     )
                 },
                 navigationIcon = {
@@ -125,17 +124,18 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Role Selection Tab Row
                 TabRow(
                     selectedTabIndex = selectedRoleIndex,
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = TerracottaPrimary,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = PurplePrimary,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(14.dp))
+                        .border(1.dp, PurplePrimary.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                 ) {
                     Tab(
                         selected = selectedRoleIndex == 0,
@@ -148,10 +148,16 @@ fun LoginScreen(
                                 Icon(
                                     imageVector = Icons.Default.Person,
                                     contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(16.dp),
+                                    tint = if (selectedRoleIndex == 0) PurplePrimary else Color.Gray
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Cliente", fontWeight = FontWeight.Bold)
+                                Text(
+                                    "Cliente",
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (selectedRoleIndex == 0) PurplePrimary else Color.Gray,
+                                    fontSize = 13.sp
+                                )
                             }
                         }
                     )
@@ -168,48 +174,55 @@ fun LoginScreen(
                                 Icon(
                                     imageVector = Icons.Default.AdminPanelSettings,
                                     contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(16.dp),
+                                    tint = if (selectedRoleIndex == 1) PurplePrimary else Color.Gray
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Administrador", fontWeight = FontWeight.Bold)
+                                Text(
+                                    "Administrador",
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (selectedRoleIndex == 1) PurplePrimary else Color.Gray,
+                                    fontSize = 13.sp
+                                )
                             }
                         }
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Demo Helper Card for Admin
                 if (selectedRoleIndex == 1) {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 16.dp),
-                        shape = RoundedCornerShape(16.dp),
+                            .padding(bottom = 12.dp),
+                        shape = RoundedCornerShape(14.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
                         )
                     ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
+                        Column(modifier = Modifier.padding(12.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.AdminPanelSettings,
                                     contentDescription = null,
-                                    tint = EarthenBrown
+                                    tint = PurplePrimary,
+                                    modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "Cuenta de Demostración Académica",
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp,
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Correo precargado: admin@louaraya.cl\nContraseña: admin123",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.85f)
+                                text = "Correo precargado: admin@louaraya.cl | Clave: admin123",
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
                             )
                         }
                     }
@@ -220,18 +233,18 @@ fun LoginScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 16.dp),
+                            .padding(bottom = 12.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.errorContainer
                         ),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(10.dp)
                     ) {
                         Text(
                             text = err,
                             color = MaterialTheme.colorScheme.onErrorContainer,
-                            fontSize = 13.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(12.dp)
+                            modifier = Modifier.padding(10.dp)
                         )
                     }
                 }
@@ -240,25 +253,25 @@ fun LoginScreen(
                 OutlinedTextField(
                     value = emailOrAlias,
                     onValueChange = { emailOrAlias = it },
-                    label = { Text("Correo Electrónico o Alias") },
-                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                    label = { Text("Correo Electrónico o Alias", fontSize = 12.sp) },
+                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = PurplePrimary) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 14.dp),
+                        .padding(bottom = 10.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = TerracottaPrimary,
-                        focusedLabelColor = TerracottaPrimary
+                        focusedBorderColor = PurplePrimary,
+                        focusedLabelColor = PurplePrimary
                     )
                 )
 
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Contraseña") },
-                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                    label = { Text("Contraseña", fontSize = 12.sp) },
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = PurplePrimary) },
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
@@ -272,11 +285,11 @@ fun LoginScreen(
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 20.dp),
+                        .padding(bottom = 16.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = TerracottaPrimary,
-                        focusedLabelColor = TerracottaPrimary
+                        focusedBorderColor = PurplePrimary,
+                        focusedLabelColor = PurplePrimary
                     )
                 )
 
@@ -288,34 +301,33 @@ fun LoginScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(16.dp),
+                        .height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = TerracottaPrimary,
+                        containerColor = PurplePrimary,
                         contentColor = Color.White
                     )
                 ) {
                     Text(
                         text = if (selectedRoleIndex == 0) "Ingresar como Cliente" else "Ingresar como Administrador",
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                // Quick Switcher for Profiles on Device
-                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                 Text(
                     text = "Perfiles Registrados en este Dispositivo",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.Start)
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 val filteredProfiles = registeredUsers.filter {
                     if (selectedRoleIndex == 0) it.role == UserRole.CLIENTE else it.role == UserRole.ADMIN
@@ -332,29 +344,31 @@ fun LoginScreen(
                             }
                         }
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 if (selectedRoleIndex == 0) {
                     OutlinedButton(
                         onClick = onNavigateToRegister,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp),
-                        shape = RoundedCornerShape(16.dp)
+                            .height(46.dp),
+                        shape = RoundedCornerShape(14.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.PersonAdd,
                             contentDescription = null,
-                            tint = TerracottaDark
+                            tint = PurplePrimary,
+                            modifier = Modifier.size(18.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "Crear Nueva Cuenta de Cliente",
-                            color = TerracottaDark,
-                            fontWeight = FontWeight.Bold
+                            color = PurplePrimary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
                         )
                     }
                 } else {
@@ -363,9 +377,10 @@ fun LoginScreen(
                         onLoginSuccess()
                     }) {
                         Text(
-                            text = "⚡ Entrar Rápidamente con Modo Demo Admin",
-                            color = TerracottaPrimary,
-                            fontWeight = FontWeight.Bold
+                            text = "⚡ Entrar con Modo Demo Admin",
+                            color = PurpleDark,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
                         )
                     }
                 }
@@ -385,18 +400,19 @@ private fun ProfileCardSelector(
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-        )
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(32.dp)
                         .clip(CircleShape)
                         .background(Color(profile.avatarColorHex).copy(alpha = 0.2f))
                         .border(1.dp, Color(profile.avatarColorHex), CircleShape),
@@ -404,22 +420,22 @@ private fun ProfileCardSelector(
                 ) {
                     Text(
                         text = profile.alias.take(2).uppercase(),
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(profile.avatarColorHex)
                     )
                 }
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(10.dp))
                 Column {
                     Text(
                         text = profile.name,
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "@${profile.alias} • ${profile.email}",
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -428,8 +444,8 @@ private fun ProfileCardSelector(
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = "Ingresar",
-                tint = TerracottaPrimary,
-                modifier = Modifier.size(20.dp)
+                tint = PurplePrimary,
+                modifier = Modifier.size(18.dp)
             )
         }
     }
