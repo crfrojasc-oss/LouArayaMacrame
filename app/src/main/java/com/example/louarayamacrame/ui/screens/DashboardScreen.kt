@@ -38,10 +38,11 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -79,8 +80,11 @@ import com.example.louarayamacrame.model.UserProfile
 import com.example.louarayamacrame.model.UserRole
 import com.example.louarayamacrame.ui.theme.EarthenBrown
 import com.example.louarayamacrame.ui.theme.GoldAccent
+import com.example.louarayamacrame.ui.theme.PurpleDark
+import com.example.louarayamacrame.ui.theme.PurplePrimary
+import com.example.louarayamacrame.ui.theme.PurpleSoft
+import com.example.louarayamacrame.ui.theme.PurpleSurface
 import com.example.louarayamacrame.ui.theme.SageGreen
-import com.example.louarayamacrame.ui.theme.TerracottaDark
 import com.example.louarayamacrame.ui.theme.TerracottaPrimary
 import com.example.louarayamacrame.ui.viewmodel.DashboardViewModel
 
@@ -88,13 +92,23 @@ import com.example.louarayamacrame.ui.viewmodel.DashboardViewModel
 @Composable
 fun DashboardScreen(
     dashboardViewModel: DashboardViewModel,
+    onNavigateToCatalog: () -> Unit,
+    onNavigateToProductDetail: (String) -> Unit,
+    onNavigateToQrScanner: () -> Unit,
+    onNavigateToFavorites: () -> Unit,
+    onNavigateToCustomRequest: () -> Unit,
+    onNavigateToAdminProducts: () -> Unit,
+    onNavigateToAdminCollections: () -> Unit,
+    onNavigateToRequestHistory: () -> Unit,
+    onNavigateToNotifications: () -> Unit,
+    onNavigateToProfile: () -> Unit,
     onNavigateToMap: () -> Unit,
-    onLogout: () -> Unit,
-    onQuickActionNotice: (String) -> Unit
+    onLogout: () -> Unit
 ) {
     val activeUser by dashboardViewModel.activeUser.collectAsState()
     val collections = dashboardViewModel.collections
-    val products = dashboardViewModel.products
+    val products by dashboardViewModel.products.collectAsState()
+    val unreadCount by dashboardViewModel.unreadCount.collectAsState()
 
     val user = activeUser ?: UserProfile(
         id = "guest",
@@ -118,39 +132,40 @@ fun DashboardScreen(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(38.dp)
+                                .size(36.dp)
                                 .clip(CircleShape)
                                 .background(Color(user.avatarColorHex).copy(alpha = 0.2f))
-                                .border(1.5.dp, Color(user.avatarColorHex), CircleShape),
+                                .border(1.5.dp, Color(user.avatarColorHex), CircleShape)
+                                .clickable { onNavigateToProfile() },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = user.alias.take(2).uppercase(),
                                 fontWeight = FontWeight.Bold,
                                 color = Color(user.avatarColorHex),
-                                fontSize = 14.sp
+                                fontSize = 13.sp
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(10.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
 
                         Column {
                             Text(
                                 text = "¡Hola, ${user.name.split(" ").first()}!",
-                                fontSize = 15.sp,
+                                fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Box(
                                     modifier = Modifier
-                                        .size(8.dp)
+                                        .size(7.dp)
                                         .clip(CircleShape)
-                                        .background(if (isAdmin) GoldAccent else SageGreen)
+                                        .background(if (isAdmin) GoldAccent else PurplePrimary)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = if (isAdmin) "Administrador" else "Cliente registrado",
-                                    fontSize = 11.sp,
+                                    fontSize = 10.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -158,11 +173,29 @@ fun DashboardScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onNavigateToNotifications) {
+                        BadgedBox(
+                            badge = {
+                                if (unreadCount > 0) {
+                                    Badge(containerColor = PurplePrimary) {
+                                        Text("$unreadCount", color = Color.White)
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = "Notificaciones",
+                                tint = PurplePrimary
+                            )
+                        }
+                    }
+
                     IconButton(onClick = onLogout) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                             contentDescription = "Cerrar Sesión",
-                            tint = TerracottaDark
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
@@ -182,22 +215,22 @@ fun DashboardScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
             ) {
-                // Role Demo Switcher Toolbar Banner
+                // Role Demo Switcher Banner
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    shape = RoundedCornerShape(16.dp),
+                        .padding(bottom = 12.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (isAdmin) TerracottaDark.copy(alpha = 0.12f) else SageGreen.copy(alpha = 0.12f)
+                        containerColor = PurpleSurface
                     )
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(12.dp),
+                            .padding(10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -208,19 +241,20 @@ fun DashboardScreen(
                             Icon(
                                 imageVector = if (isAdmin) Icons.Default.AdminPanelSettings else Icons.Default.Person,
                                 contentDescription = null,
-                                tint = if (isAdmin) TerracottaDark else SageGreen
+                                tint = PurplePrimary,
+                                modifier = Modifier.size(20.dp)
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                             Column {
                                 Text(
                                     text = if (isAdmin) "Modo Administrador Activo" else "Modo Cliente Activo",
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    fontSize = 11.sp,
+                                    color = PurpleDark
                                 )
                                 Text(
-                                    text = if (isAdmin) "Gestión comercial, productos y eventos" else "Catálogo, favoritos, QR y mapa",
-                                    fontSize = 10.sp,
+                                    text = if (isAdmin) "Gestión de catálogo, eventos y cotizaciones" else "Explora catálogo, mapas, QR y favoritos",
+                                    fontSize = 9.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -229,40 +263,42 @@ fun DashboardScreen(
                         Button(
                             onClick = { dashboardViewModel.toggleRoleDemo() },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isAdmin) TerracottaPrimary else EarthenBrown
+                                containerColor = PurplePrimary
                             ),
-                            shape = RoundedCornerShape(12.dp),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                            shape = RoundedCornerShape(10.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.SwapHoriz,
                                 contentDescription = null,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(14.dp)
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(2.dp))
                             Text(
                                 text = "Cambiar Rol",
-                                fontSize = 11.sp,
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
                     }
                 }
 
-                // Search Bar
+                // Search Bar leading to Catalog
                 OutlinedTextField(
                     value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    placeholder = { Text("Buscar arcos, tapices, lámparas en macramé...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    onValueChange = {
+                        searchQuery = it
+                        if (it.isNotBlank()) onNavigateToCatalog()
+                    },
+                    placeholder = { Text("Buscar en el catálogo de macramé...", fontSize = 12.sp) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = PurplePrimary) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    shape = RoundedCornerShape(16.dp),
+                        .padding(bottom = 12.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = TerracottaPrimary,
-                        unfocusedBorderColor = Color.LightGray
+                        focusedBorderColor = PurplePrimary
                     )
                 )
 
@@ -271,25 +307,25 @@ fun DashboardScreen(
                     Text(
                         text = "Accesos Rápidos del Cliente",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // Grid of 6 Client Quick Action Cards
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    // Compact Grid of 6 Client Quick Action Cards
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             QuickActionCard(
                                 title = "Catálogo",
                                 subtitle = "Piezas & Precios",
                                 icon = Icons.Default.ShoppingBag,
-                                color = TerracottaPrimary,
+                                color = PurplePrimary,
                                 modifier = Modifier.weight(1f),
-                                onClick = { onQuickActionNotice("Abriendo Catálogo de Diseños Artesanales (Pantalla 6)...") }
+                                onClick = onNavigateToCatalog
                             )
                             QuickActionCard(
                                 title = "Mapa Ferias",
@@ -303,72 +339,70 @@ fun DashboardScreen(
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             QuickActionCard(
                                 title = "Escáner QR",
                                 subtitle = "Leer Etiquetas",
                                 icon = Icons.Default.QrCodeScanner,
-                                color = EarthenBrown,
+                                color = PurpleDark,
                                 modifier = Modifier.weight(1f),
-                                onClick = { onQuickActionNotice("Activando Cámara Lector QR de Producto (Pantalla 8)...") }
+                                onClick = onNavigateToQrScanner
                             )
                             QuickActionCard(
-                                title = "Solicitudes",
-                                subtitle = "Cotizaciones",
+                                title = "Cotizaciones",
+                                subtitle = "Pedir a Medida",
                                 icon = Icons.Default.ListAlt,
-                                color = TerracottaDark,
+                                color = TerracottaPrimary,
                                 modifier = Modifier.weight(1f),
-                                onClick = { onQuickActionNotice("Abriendo Solicitudes & Personalización a Medida (Pantallas 10 y 13)...") }
+                                onClick = onNavigateToCustomRequest
                             )
                         }
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             QuickActionCard(
-                                title = "Mis Favoritos",
-                                subtitle = "Colección Guardada",
+                                title = "Favoritos",
+                                subtitle = "Mi Colección",
                                 icon = Icons.Default.Favorite,
-                                color = TerracottaPrimary,
+                                color = PurplePrimary,
                                 modifier = Modifier.weight(1f),
-                                onClick = { onQuickActionNotice("Abriendo Colección de Favoritos del Cliente (Pantalla 9)...") }
+                                onClick = onNavigateToFavorites
                             )
                             QuickActionCard(
                                 title = "Mi Perfil",
                                 subtitle = "Cuenta & Ajustes",
                                 icon = Icons.Default.Person,
-                                color = SageGreen,
+                                color = EarthenBrown,
                                 modifier = Modifier.weight(1f),
-                                onClick = { onQuickActionNotice("Abriendo Perfil de Cliente y Configuración (Pantalla 15)...") }
+                                onClick = onNavigateToProfile
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     // Featured Collections Carousel
                     Text(
                         text = "Colecciones Destacadas",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         items(collections) { col ->
-                            CollectionCardItem(collection = col, onClick = {
-                                onQuickActionNotice("Explorando Colección '${col.title}'...")
-                            })
+                            CollectionCardItem(collection = col, onClick = onNavigateToCatalog)
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     // Featured Products Showcase
                     Row(
@@ -379,23 +413,24 @@ fun DashboardScreen(
                         Text(
                             text = "Nuevos Diseños en Macramé",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
+                            fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         AssistChip(
-                            onClick = { onQuickActionNotice("Ver todo el catálogo...") },
-                            label = { Text("Ver Todo", fontSize = 11.sp) },
-                            colors = AssistChipDefaults.assistChipColors(labelColor = TerracottaPrimary)
+                            onClick = onNavigateToCatalog,
+                            label = { Text("Ver Todo", fontSize = 10.sp, fontWeight = FontWeight.Bold) },
+                            colors = AssistChipDefaults.assistChipColors(labelColor = PurplePrimary)
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        products.forEach { product ->
-                            ProductShowcaseCard(product = product, onClick = {
-                                onQuickActionNotice("Detalle de Producto: ${product.name} (Pantalla 7)")
-                            })
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        products.take(3).forEach { product ->
+                            ProductShowcaseCard(
+                                product = product,
+                                onClick = { onNavigateToProductDetail(product.id) }
+                            )
                         }
                     }
 
@@ -404,91 +439,91 @@ fun DashboardScreen(
                     Text(
                         text = "Resumen de Gestión Comercial",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     // Metrics Cards Grid
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         MetricSummaryCard(
                             title = "Cotizaciones",
-                            count = "3 Nuevas",
+                            count = "2 Nuevas",
                             icon = Icons.Default.ListAlt,
-                            color = TerracottaPrimary,
+                            color = PurplePrimary,
                             modifier = Modifier.weight(1f)
                         )
                         MetricSummaryCard(
                             title = "Productos",
-                            count = "24 Activos",
+                            count = "${products.size} Activos",
                             icon = Icons.Default.Inventory,
                             color = SageGreen,
                             modifier = Modifier.weight(1f)
                         )
                         MetricSummaryCard(
-                            title = "Eventos",
-                            count = "2 Este mes",
+                            title = "Ferias",
+                            count = "4 Puntos",
                             icon = Icons.Default.LocationOn,
-                            color = EarthenBrown,
+                            color = TerracottaPrimary,
                             modifier = Modifier.weight(1f)
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
                         text = "Panel de Administración",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     // Admin Quick Actions Grid
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         AdminActionTile(
                             title = "Gestión de Productos",
-                            description = "Crear, editar, subir fotos y ajustar precios o disponibilidad",
+                            description = "Crear, editar, precios, disponibilidad y fotos de macramé",
                             icon = Icons.Default.Add,
-                            color = TerracottaPrimary,
-                            onClick = { onQuickActionNotice("Abriendo Gestión de Productos (Pantalla 11)...") }
+                            color = PurplePrimary,
+                            onClick = onNavigateToAdminProducts
                         )
 
                         AdminActionTile(
-                            title = "Gestión de Colecciones y Campañas",
-                            description = "Publicar colecciones nupciales, eventos y notificaciones",
+                            title = "Gestión de Colecciones & Campañas",
+                            description = "Crear promociones nupciales, eventos y notificaciones push",
                             icon = Icons.Default.Campaign,
-                            color = SageGreen,
-                            onClick = { onQuickActionNotice("Abriendo Gestión de Colecciones y Campañas (Pantalla 12)...") }
+                            color = PurpleDark,
+                            onClick = onNavigateToAdminCollections
                         )
 
                         AdminActionTile(
                             title = "Historial y Solicitudes de Clientes",
-                            description = "Revisar solicitudes de cotización a medida y actualizar estados",
+                            description = "Revisar cotizaciones a medida y actualizar estados de producción",
                             icon = Icons.Default.ListAlt,
-                            color = EarthenBrown,
-                            onClick = { onQuickActionNotice("Abriendo Historial de Solicitudes (Pantalla 13)...") }
+                            color = TerracottaPrimary,
+                            onClick = onNavigateToRequestHistory
                         )
 
                         AdminActionTile(
                             title = "Administrar Ferias y Showrooms",
-                            description = "Ver y agregar puntos en el mapa interactivo de eventos",
+                            description = "Gestionar puntos de venta presencial en el mapa",
                             icon = Icons.Default.LocationOn,
-                            color = TerracottaDark,
+                            color = SageGreen,
                             onClick = onNavigateToMap
                         )
 
                         AdminActionTile(
                             title = "Lector & Verificador de Código QR",
-                            description = "Escanear etiquetas presenciales de macramé en ferias",
+                            description = "Escanear etiquetas presenciales de macramé e historial",
                             icon = Icons.Default.QrCodeScanner,
-                            color = SageGreen,
-                            onClick = { onQuickActionNotice("Activando Lector QR de Administrador (Pantalla 8)...") }
+                            color = EarthenBrown,
+                            onClick = onNavigateToQrScanner
                         )
                     }
                 }
@@ -508,22 +543,22 @@ private fun QuickActionCard(
 ) {
     Card(
         modifier = modifier
-            .height(90.dp)
+            .height(80.dp)
             .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = color.copy(alpha = 0.12f)
+            containerColor = color.copy(alpha = 0.1f)
         )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp),
+                .padding(10.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Box(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(28.dp)
                     .clip(CircleShape)
                     .background(color),
                 contentAlignment = Alignment.Center
@@ -532,7 +567,7 @@ private fun QuickActionCard(
                     imageVector = icon,
                     contentDescription = title,
                     tint = Color.White,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
 
@@ -540,12 +575,12 @@ private fun QuickActionCard(
                 Text(
                     text = title,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = subtitle,
-                    fontSize = 10.sp,
+                    fontSize = 9.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -560,10 +595,10 @@ private fun CollectionCardItem(
 ) {
     Card(
         modifier = Modifier
-            .width(220.dp)
-            .height(130.dp)
+            .width(200.dp)
+            .height(115.dp)
             .clickable { onClick() },
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Box(
@@ -571,10 +606,10 @@ private fun CollectionCardItem(
                 .fillMaxSize()
                 .background(
                     Brush.linearGradient(
-                        colors = listOf(TerracottaPrimary, EarthenBrown)
+                        colors = listOf(PurplePrimary, PurpleDark)
                     )
                 )
-                .padding(14.dp)
+                .padding(12.dp)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -587,13 +622,13 @@ private fun CollectionCardItem(
                 ) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(6.dp))
                             .background(GoldAccent)
-                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
                         Text(
                             text = collection.badgeText,
-                            fontSize = 10.sp,
+                            fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black
                         )
@@ -602,8 +637,8 @@ private fun CollectionCardItem(
                     Icon(
                         imageVector = Icons.Default.AutoAwesome,
                         contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.8f),
-                        modifier = Modifier.size(18.dp)
+                        tint = PurpleSoft,
+                        modifier = Modifier.size(16.dp)
                     )
                 }
 
@@ -611,12 +646,12 @@ private fun CollectionCardItem(
                     Text(
                         text = collection.title,
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         color = Color.White
                     )
                     Text(
                         text = collection.subtitle,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         color = Color.White.copy(alpha = 0.85f),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
@@ -632,88 +667,85 @@ private fun ProductShowcaseCard(
     product: MacrameProduct,
     onClick: () -> Unit
 ) {
-    var isFav by remember { mutableStateOf(product.isFavorite) }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(64.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(TerracottaDark.copy(alpha = 0.15f)),
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(PurplePrimary.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.ShoppingBag,
                     contentDescription = null,
-                    tint = TerracottaPrimary,
-                    modifier = Modifier.size(32.dp)
+                    tint = PurplePrimary,
+                    modifier = Modifier.size(28.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(SageGreen.copy(alpha = 0.15f))
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(PurpleSurface)
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
                     Text(
                         text = product.category,
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
-                        color = SageGreen
+                        color = PurplePrimary
                     )
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
 
                 Text(
                     text = product.name,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
+                    fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Text(
                     text = "${product.dimensions} • ${product.materials}",
-                    fontSize = 11.sp,
+                    fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
 
                 Text(
                     text = "$${String.format("%,.0f", product.price)} CLP",
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 14.sp,
-                    color = TerracottaPrimary
+                    fontSize = 13.sp,
+                    color = PurplePrimary
                 )
             }
 
-            IconButton(onClick = { isFav = !isFav }) {
-                Icon(
-                    imageVector = if (isFav) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = "Favorito",
-                    tint = if (isFav) TerracottaPrimary else Color.Gray
-                )
-            }
+            Icon(
+                imageVector = if (product.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "Favorito",
+                tint = if (product.isFavorite) PurplePrimary else Color.Gray,
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
@@ -728,31 +760,31 @@ private fun MetricSummaryCard(
 ) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = color.copy(alpha = 0.12f)
+            containerColor = color.copy(alpha = 0.1f)
         )
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(10.dp),
             horizontalAlignment = Alignment.Start
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = color,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(18.dp)
             )
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = count,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = title,
-                fontSize = 10.sp,
+                fontSize = 9.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -771,18 +803,19 @@ private fun AdminActionTile(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-        )
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(42.dp)
+                    .size(36.dp)
                     .clip(CircleShape)
                     .background(color),
                 contentAlignment = Alignment.Center
@@ -791,24 +824,24 @@ private fun AdminActionTile(
                     imageVector = icon,
                     contentDescription = title,
                     tint = Color.White,
-                    modifier = Modifier.size(22.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = description,
-                    fontSize = 11.sp,
+                    fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 14.sp
+                    lineHeight = 13.sp
                 )
             }
         }

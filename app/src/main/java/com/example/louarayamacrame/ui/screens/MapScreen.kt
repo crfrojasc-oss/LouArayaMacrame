@@ -67,11 +67,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.louarayamacrame.model.EventShowroom
-import com.example.louarayamacrame.ui.theme.EarthenBrown
 import com.example.louarayamacrame.ui.theme.GoldAccent
+import com.example.louarayamacrame.ui.theme.PurpleDark
+import com.example.louarayamacrame.ui.theme.PurplePrimary
+import com.example.louarayamacrame.ui.theme.PurpleSurface
 import com.example.louarayamacrame.ui.theme.SageGreen
-import com.example.louarayamacrame.ui.theme.TerracottaDark
-import com.example.louarayamacrame.ui.theme.TerracottaPrimary
 import com.example.louarayamacrame.ui.viewmodel.MapViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -109,11 +109,22 @@ fun MapScreen(
                 },
                 actions = {
                     if (isAdmin) {
-                        IconButton(onClick = { onNotice("Abriendo formulario para agregar evento en mapa...") }) {
+                        IconButton(onClick = {
+                            mapViewModel.addEvent(
+                                title = "Feria de Diseño & Macramé",
+                                locationName = "Plaza de la Cultura",
+                                address = "Av. Providencia 1200",
+                                city = "Santiago",
+                                schedule = "11:00 - 20:00 hrs",
+                                standNumber = "Stand #15",
+                                description = "Muestra artesanal de tejidos en macramé y colecciones a medida."
+                            )
+                            onNotice("Nueva feria agregada al mapa de eventos.")
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.Add,
                                 contentDescription = "Agregar Evento",
-                                tint = TerracottaPrimary
+                                tint = PurplePrimary
                             )
                         }
                     }
@@ -134,43 +145,43 @@ fun MapScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 14.dp, vertical = 6.dp)
             ) {
                 // Search Bar
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { mapViewModel.setSearchQuery(it) },
-                    placeholder = { Text("Buscar feria, recinto o ciudad...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    placeholder = { Text("Buscar feria, recinto o ciudad...", fontSize = 12.sp) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = PurplePrimary) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 10.dp),
-                    shape = RoundedCornerShape(14.dp),
+                        .padding(bottom = 8.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = TerracottaPrimary
+                        focusedBorderColor = PurplePrimary
                     )
                 )
 
                 // City Filter Chips
                 Text(
                     text = "Filtrar por Ciudad",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(vertical = 6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.padding(vertical = 4.dp)
                 ) {
                     items(cities) { city ->
                         FilterChip(
                             selected = selectedCity == city,
                             onClick = { mapViewModel.setCity(city) },
-                            label = { Text(city, fontSize = 12.sp) },
+                            label = { Text(city, fontSize = 11.sp) },
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = TerracottaPrimary,
+                                selectedContainerColor = PurplePrimary,
                                 selectedLabelColor = Color.White
                             )
                         )
@@ -181,88 +192,85 @@ fun MapScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(230.dp)
-                        .padding(vertical = 10.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        .height(210.dp)
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color(0xFFEFE8DE))
+                            .background(Color(0xFFF2ECE4))
                     ) {
-                        // Map grid background styling
                         Canvas(modifier = Modifier.fillMaxSize()) {
-                            val gridSpacing = 40.dp.toPx()
+                            val gridSpacing = 36.dp.toPx()
                             val width = size.width
                             val height = size.height
 
                             for (x in 0..(width / gridSpacing).toInt()) {
                                 drawLine(
-                                    color = Color.Gray.copy(alpha = 0.15f),
+                                    color = PurplePrimary.copy(alpha = 0.12f),
                                     start = Offset(x * gridSpacing, 0f),
                                     end = Offset(x * gridSpacing, height),
-                                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(5f, 5f))
+                                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 4f))
                                 )
                             }
                             for (y in 0..(height / gridSpacing).toInt()) {
                                 drawLine(
-                                    color = Color.Gray.copy(alpha = 0.15f),
+                                    color = PurplePrimary.copy(alpha = 0.12f),
                                     start = Offset(0f, y * gridSpacing),
                                     end = Offset(width, y * gridSpacing),
-                                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(5f, 5f))
+                                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 4f))
                                 )
                             }
                         }
 
-                        // Map Legend & Current Position Badge
+                        // Map Legend
                         Row(
                             modifier = Modifier
                                 .align(Alignment.TopStart)
-                                .padding(12.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color.White.copy(alpha = 0.9f))
+                                .padding(10.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color.White.copy(alpha = 0.92f))
                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Place,
                                 contentDescription = null,
-                                tint = TerracottaPrimary,
-                                modifier = Modifier.size(16.dp)
+                                tint = PurplePrimary,
+                                modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = "Puntos de Exhibición (${events.size})",
-                                fontSize = 11.sp,
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
 
-                        // Render Interactive Map Pins
-                        val totalEvents = events.ifEmpty { listOf() }
-                        totalEvents.forEachIndexed { index, event ->
+                        // Map Pins
+                        events.forEachIndexed { index, event ->
                             val isSelected = selectedEvent?.id == event.id
-                            // Generate mock spatial coordinates on map box based on index
                             val offsetX = when (index % 4) {
-                                0 -> 0.22f
-                                1 -> 0.48f
-                                2 -> 0.72f
-                                else -> 0.82f
+                                0 -> 0.20f
+                                1 -> 0.45f
+                                2 -> 0.70f
+                                else -> 0.80f
                             }
                             val offsetY = when (index % 3) {
-                                0 -> 0.28f
-                                1 -> 0.58f
-                                else -> 0.78f
+                                0 -> 0.25f
+                                1 -> 0.55f
+                                else -> 0.75f
                             }
 
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(
-                                        start = (offsetX * 280).dp,
-                                        top = (offsetY * 160).dp
+                                        start = (offsetX * 260).dp,
+                                        top = (offsetY * 150).dp
                                     )
                             ) {
                                 Column(
@@ -271,11 +279,11 @@ fun MapScreen(
                                 ) {
                                     Box(
                                         modifier = Modifier
-                                            .size(if (isSelected) 42.dp else 32.dp)
+                                            .size(if (isSelected) 38.dp else 30.dp)
                                             .clip(CircleShape)
-                                            .background(if (event.status == "En curso") SageGreen else TerracottaPrimary)
+                                            .background(if (event.status == "En curso") SageGreen else PurplePrimary)
                                             .border(
-                                                width = if (isSelected) 3.dp else 1.dp,
+                                                width = if (isSelected) 2.5.dp else 1.dp,
                                                 color = if (isSelected) GoldAccent else Color.White,
                                                 shape = CircleShape
                                             ),
@@ -285,19 +293,19 @@ fun MapScreen(
                                             imageVector = Icons.Default.Storefront,
                                             contentDescription = event.title,
                                             tint = Color.White,
-                                            modifier = Modifier.size(if (isSelected) 22.dp else 16.dp)
+                                            modifier = Modifier.size(if (isSelected) 20.dp else 15.dp)
                                         )
                                     }
 
                                     Box(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(6.dp))
+                                            .clip(RoundedCornerShape(4.dp))
                                             .background(Color.White.copy(alpha = 0.95f))
-                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                            .padding(horizontal = 4.dp, vertical = 2.dp)
                                     ) {
                                         Text(
                                             text = event.city,
-                                            fontSize = 9.sp,
+                                            fontSize = 8.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
@@ -305,30 +313,21 @@ fun MapScreen(
                                 }
                             }
                         }
-
-                        if (events.isEmpty()) {
-                            Text(
-                                text = "No se encontraron ferias con los filtros seleccionados.",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 // Selected Event Details Card
                 selectedEvent?.let { event ->
                     Text(
                         text = "Feria / Showroom Seleccionado",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     AnimatedVisibility(
                         visible = true,
@@ -337,14 +336,14 @@ fun MapScreen(
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            shape = RoundedCornerShape(18.dp),
+                                .padding(bottom = 12.dp),
+                            shape = RoundedCornerShape(14.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                containerColor = MaterialTheme.colorScheme.surface
                             ),
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                         ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
+                            Column(modifier = Modifier.padding(14.dp)) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -352,13 +351,13 @@ fun MapScreen(
                                 ) {
                                     Box(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(if (event.status == "En curso") SageGreen else TerracottaPrimary)
-                                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(if (event.status == "En curso") SageGreen else PurplePrimary)
+                                            .padding(horizontal = 8.dp, vertical = 3.dp)
                                     ) {
                                         Text(
                                             text = event.status.uppercase(),
-                                            fontSize = 10.sp,
+                                            fontSize = 9.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White
                                         )
@@ -366,134 +365,133 @@ fun MapScreen(
 
                                     Text(
                                         text = event.standNumber,
-                                        fontSize = 11.sp,
+                                        fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = EarthenBrown
+                                        color = PurpleDark
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(6.dp))
 
                                 Text(
                                     text = event.title,
-                                    fontSize = 17.sp,
+                                    fontSize = 15.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
 
-                                Spacer(modifier = Modifier.height(6.dp))
+                                Spacer(modifier = Modifier.height(4.dp))
 
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = Icons.Default.Place,
                                         contentDescription = null,
-                                        tint = TerracottaPrimary,
-                                        modifier = Modifier.size(16.dp)
+                                        tint = PurplePrimary,
+                                        modifier = Modifier.size(14.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
                                     Text(
                                         text = "${event.locationName} • ${event.address}, ${event.city}",
-                                        fontSize = 12.sp,
+                                        fontSize = 11.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(2.dp))
 
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = Icons.Default.CalendarMonth,
                                         contentDescription = null,
                                         tint = SageGreen,
-                                        modifier = Modifier.size(16.dp)
+                                        modifier = Modifier.size(14.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
                                     Text(
                                         text = "Fechas: ${event.startDate} al ${event.endDate} (${event.schedule})",
-                                        fontSize = 12.sp,
+                                        fontSize = 11.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.height(10.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
 
                                 Text(
                                     text = event.description,
-                                    fontSize = 12.sp,
+                                    fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurface,
-                                    lineHeight = 17.sp
+                                    lineHeight = 15.sp
                                 )
 
-                                Spacer(modifier = Modifier.height(12.dp))
+                                Spacer(modifier = Modifier.height(10.dp))
 
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(MaterialTheme.colorScheme.background)
-                                        .padding(10.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(PurpleSurface)
+                                        .padding(8.dp)
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Icon(
                                             imageVector = Icons.Default.ShoppingBag,
                                             contentDescription = null,
-                                            tint = TerracottaDark,
-                                            modifier = Modifier.size(18.dp)
+                                            tint = PurplePrimary,
+                                            modifier = Modifier.size(16.dp)
                                         )
-                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
                                         Column {
                                             Text(
                                                 text = "Colección Exhibida:",
-                                                fontSize = 10.sp,
+                                                fontSize = 9.sp,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                             Text(
                                                 text = event.featuredCollection,
-                                                fontSize = 12.sp,
+                                                fontSize = 11.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = TerracottaDark
+                                                color = PurpleDark
                                             )
                                         }
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(14.dp))
+                                Spacer(modifier = Modifier.height(10.dp))
 
-                                // Action buttons for selected fair
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
                                     Button(
                                         onClick = { onNotice("Iniciando GPS hacia ${event.locationName} (${event.address})...") },
                                         modifier = Modifier.weight(1f),
-                                        shape = RoundedCornerShape(12.dp),
+                                        shape = RoundedCornerShape(10.dp),
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = TerracottaPrimary,
+                                            containerColor = PurplePrimary,
                                             contentColor = Color.White
                                         )
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Directions,
                                             contentDescription = null,
-                                            modifier = Modifier.size(16.dp)
+                                            modifier = Modifier.size(14.dp)
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Cómo Llegar", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                        Text("Cómo Llegar", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                                     }
 
                                     OutlinedButton(
                                         onClick = { onNotice("Recordatorio guardado para '${event.title}' en tu calendario.") },
-                                        shape = RoundedCornerShape(12.dp)
+                                        shape = RoundedCornerShape(10.dp)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.BookmarkBorder,
                                             contentDescription = null,
-                                            tint = EarthenBrown,
-                                            modifier = Modifier.size(16.dp)
+                                            tint = PurpleDark,
+                                            modifier = Modifier.size(14.dp)
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Guardar", fontSize = 12.sp, color = EarthenBrown)
+                                        Text("Guardar", fontSize = 11.sp, color = PurpleDark)
                                     }
                                 }
                             }
@@ -501,17 +499,17 @@ fun MapScreen(
                     }
                 }
 
-                // List of All Fairs and Showrooms
+                // List of All Fairs
                 Text(
                     text = "Todas las Ferias y Puntos de Exhibición",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
+                    fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     events.forEach { item ->
                         EventListItemTile(
                             event = item,
@@ -535,59 +533,53 @@ private fun EventListItemTile(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) TerracottaPrimary.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface
+            containerColor = if (isSelected) PurpleSurface else MaterialTheme.colorScheme.surface
         ),
-        border = if (isSelected) BorderStroke(1.5.dp, TerracottaPrimary) else null
+        border = if (isSelected) BorderStroke(1.5.dp, PurplePrimary) else null
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(44.dp)
+                    .size(38.dp)
                     .clip(CircleShape)
-                    .background(if (event.status == "En curso") SageGreen else EarthenBrown),
+                    .background(if (event.status == "En curso") SageGreen else PurplePrimary),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Storefront,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(22.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = event.title,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                Text(
+                    text = event.title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
 
                 Text(
                     text = "${event.city} • ${event.locationName}",
-                    fontSize = 11.sp,
+                    fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Text(
                     text = "🗓️ ${event.startDate} - ${event.endDate} | ${event.standNumber}",
-                    fontSize = 10.sp,
-                    color = EarthenBrown,
+                    fontSize = 9.sp,
+                    color = PurpleDark,
                     fontWeight = FontWeight.Medium
                 )
             }

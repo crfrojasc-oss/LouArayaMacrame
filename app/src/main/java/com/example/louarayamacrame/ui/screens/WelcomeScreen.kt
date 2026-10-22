@@ -56,10 +56,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.louarayamacrame.ui.theme.EarthenBrown
 import com.example.louarayamacrame.ui.theme.GoldAccent
+import com.example.louarayamacrame.ui.theme.PurpleDark
+import com.example.louarayamacrame.ui.theme.PurplePrimary
+import com.example.louarayamacrame.ui.theme.PurpleSoft
 import com.example.louarayamacrame.ui.theme.SageGreen
-import com.example.louarayamacrame.ui.theme.TerracottaDark
 import com.example.louarayamacrame.ui.theme.TerracottaPrimary
 
 @Composable
@@ -82,101 +83,98 @@ fun WelcomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp),
+                .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // Header Branding
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier.padding(top = 12.dp)
             ) {
-                // Logo Icon Symbol
+                // Logo Icon Symbol with Purple Accent Gradient
                 Box(
                     modifier = Modifier
-                        .size(80.dp)
+                        .size(72.dp)
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
-                                colors = listOf(TerracottaPrimary, TerracottaDark)
+                                colors = listOf(PurplePrimary, PurpleDark)
                             )
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "LA",
-                        fontSize = 32.sp,
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         fontFamily = FontFamily.Serif
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
                     text = "LOU ARAYA",
-                    fontSize = 28.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 3.sp,
+                    letterSpacing = 2.5.sp,
                     color = MaterialTheme.colorScheme.onBackground,
                     fontFamily = FontFamily.Serif
                 )
 
                 Text(
                     text = "MACRAMÉ",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = 6.sp,
-                    color = TerracottaPrimary
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 5.sp,
+                    color = PurplePrimary
                 )
 
                 Text(
                     text = "Diseño Textil & Decoración Artesanal Premium",
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
 
             // Hero Card Showcase
             AnimatedVisibility(
                 visible = isVisible,
-                enter = fadeIn(animationSpec = tween(800)) + slideInVertically(
-                    initialOffsetY = { 100 },
-                    animationSpec = tween(800)
+                enter = fadeIn(animationSpec = tween(600)) + slideInVertically(
+                    initialOffsetY = { 60 },
+                    animationSpec = tween(600)
                 )
             ) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 20.dp),
-                    shape = RoundedCornerShape(24.dp),
+                        .padding(vertical = 14.dp),
+                    shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        containerColor = MaterialTheme.colorScheme.surface
                     ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(
-                        modifier = Modifier.padding(20.dp),
+                        modifier = Modifier.padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Decorative Knot Graphic Box
+                        // Decorative Purple Accent Banner
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(130.dp)
-                                .clip(RoundedCornerShape(16.dp))
+                                .height(110.dp)
+                                .clip(RoundedCornerShape(14.dp))
                                 .background(
-                                    Brush.verticalGradient(
-                                        colors = listOf(
-                                            TerracottaDark,
-                                            EarthenBrown
-                                        )
+                                    Brush.horizontalGradient(
+                                        colors = listOf(PurpleDark, PurplePrimary)
                                     )
                                 )
-                                .padding(16.dp),
+                                .padding(12.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -184,46 +182,46 @@ fun WelcomeScreen(
                                     imageVector = Icons.Default.AutoAwesome,
                                     contentDescription = null,
                                     tint = GoldAccent,
-                                    modifier = Modifier.size(36.dp)
+                                    modifier = Modifier.size(30.dp)
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "100% Algodón Natural & Hecho a Mano",
+                                    text = "Tejidos en Algodón 100% Natural",
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp,
+                                    fontSize = 14.sp,
                                     textAlign = TextAlign.Center
                                 )
                                 Text(
                                     text = "Matrimonios • Festivales • Showrooms • Hogar",
-                                    color = Color.White.copy(alpha = 0.85f),
-                                    fontSize = 12.sp,
+                                    color = PurpleSoft,
+                                    fontSize = 11.sp,
                                     textAlign = TextAlign.Center
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = "Catálogo Portátil e Interacción Comercial",
-                            fontSize = 16.sp,
+                            text = "Catálogo Portátil & Experiencia Múltiple",
+                            fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
                             textAlign = TextAlign.Center
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
 
                         Text(
                             text = "Explora colecciones exclusivas, localiza ferias de exhibición, escanea etiquetas QR en vivo y solicita cotizaciones personalizadas a medida.",
-                            fontSize = 13.sp,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
-                            lineHeight = 18.sp
+                            lineHeight = 16.sp
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         // Features Badges Row
                         Row(
@@ -233,7 +231,7 @@ fun WelcomeScreen(
                             FeatureBadge(
                                 icon = Icons.Default.ShoppingBag,
                                 label = "Catálogo",
-                                color = TerracottaPrimary
+                                color = PurplePrimary
                             )
                             FeatureBadge(
                                 icon = Icons.Default.LocationOn,
@@ -243,12 +241,12 @@ fun WelcomeScreen(
                             FeatureBadge(
                                 icon = Icons.Default.CameraAlt,
                                 label = "Lector QR",
-                                color = EarthenBrown
+                                color = TerracottaPrimary
                             )
                             FeatureBadge(
                                 icon = Icons.Default.Favorite,
                                 label = "Favoritos",
-                                color = TerracottaDark
+                                color = PurpleDark
                             )
                         }
                     }
@@ -264,66 +262,68 @@ fun WelcomeScreen(
                     onClick = onNavigateToLogin,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(54.dp),
-                    shape = RoundedCornerShape(16.dp),
+                        .height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = TerracottaPrimary,
+                        containerColor = PurplePrimary,
                         contentColor = Color.White
                     )
                 ) {
                     Text(
                         text = "Comenzar / Iniciar Sesión",
-                        fontSize = 16.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = null
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 OutlinedButton(
                     onClick = onNavigateToRegister,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(54.dp),
-                    shape = RoundedCornerShape(16.dp),
+                        .height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
                     border = ButtonDefaults.outlinedButtonBorder.copy(
-                        brush = Brush.horizontalGradient(listOf(TerracottaPrimary, EarthenBrown))
+                        brush = Brush.horizontalGradient(listOf(PurplePrimary, PurpleDark))
                     )
                 ) {
                     Icon(
                         imageVector = Icons.Default.PersonAdd,
                         contentDescription = null,
-                        tint = TerracottaPrimary
+                        tint = PurplePrimary,
+                        modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Registrarse como Cliente",
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = TerracottaPrimary
+                        color = PurplePrimary
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 TextButton(onClick = onNavigateToMap) {
                     Icon(
                         imageVector = Icons.Default.LocationOn,
                         contentDescription = null,
-                        tint = SageGreen,
-                        modifier = Modifier.size(18.dp)
+                        tint = PurpleDark,
+                        modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "Ver Mapa de Ferias y Showrooms",
-                        fontSize = 13.sp,
-                        color = SageGreen,
-                        fontWeight = FontWeight.Medium
+                        fontSize = 12.sp,
+                        color = PurpleDark,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
@@ -342,23 +342,23 @@ private fun FeatureBadge(
     ) {
         Box(
             modifier = Modifier
-                .size(42.dp)
+                .size(38.dp)
                 .clip(CircleShape)
-                .background(color.copy(alpha = 0.15f))
-                .border(1.dp, color.copy(alpha = 0.3f), CircleShape),
+                .background(color.copy(alpha = 0.12f))
+                .border(1.dp, color.copy(alpha = 0.25f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
                 tint = color,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(18.dp)
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = label,
-            fontSize = 11.sp,
+            fontSize = 10.sp,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurface
         )

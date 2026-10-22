@@ -2,12 +2,20 @@ package com.example.louarayamacrame.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.louarayamacrame.data.CampaignRepository
 import com.example.louarayamacrame.data.CatalogRepository
 import com.example.louarayamacrame.data.EventRepository
+import com.example.louarayamacrame.data.NotificationRepository
+import com.example.louarayamacrame.data.QrRepository
+import com.example.louarayamacrame.data.RequestRepository
 import com.example.louarayamacrame.data.UserRepository
+import com.example.louarayamacrame.model.AppNotification
+import com.example.louarayamacrame.model.CustomRequest
 import com.example.louarayamacrame.model.EventShowroom
+import com.example.louarayamacrame.model.MacrameCampaign
 import com.example.louarayamacrame.model.MacrameCollection
 import com.example.louarayamacrame.model.MacrameProduct
+import com.example.louarayamacrame.model.QrScanHistoryItem
 import com.example.louarayamacrame.model.UserProfile
 import com.example.louarayamacrame.model.UserRole
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +23,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 class AuthViewModel : ViewModel() {
@@ -90,6 +99,10 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    fun updateProfile(name: String, alias: String, phone: String, avatarId: String) {
+        UserRepository.updateProfile(name, alias, phone, avatarId)
+    }
+
     fun switchUser(user: UserProfile) {
         UserRepository.switchActiveUser(user)
     }
@@ -108,7 +121,12 @@ class AuthViewModel : ViewModel() {
 class DashboardViewModel : ViewModel() {
     val activeUser: StateFlow<UserProfile?> = UserRepository.activeUser
     val collections: List<MacrameCollection> = CatalogRepository.sampleCollections
-    val products: List<MacrameProduct> = CatalogRepository.sampleProducts
+    val products: StateFlow<List<MacrameProduct>> = CatalogRepository.products
+    val notifications: StateFlow<List<AppNotification>> = NotificationRepository.notifications
+
+    val unreadCount: StateFlow<Int> = notifications.map { list ->
+        list.count { !it.isRead }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, 0)
 
     fun toggleRoleDemo() {
         val current = UserRepository.activeUser.value
@@ -171,5 +189,201 @@ class MapViewModel : ViewModel() {
 
     fun selectEvent(event: EventShowroom?) {
         _selectedEvent.value = event
+    }
+
+    fun addEvent(
+        title: String,
+        locationName: String,
+        address: String,
+        city: String,
+        schedule: String,
+        standNumber: String,
+        description: String
+    ) {
+        val newEvent = EventShowroom(
+            id = "evt_${System.currentTimeMillis()}",
+            title = title,
+            locationName = locationName,
+            address = address,
+            city = city,
+            latitude = -33.4000,
+            longitude = -70.5700,
+            startDate = "Hoy",
+            endDate = "Fin de semana",
+            schedule = schedule,
+            standNumber = standNumber,
+            description = description,
+            status = "Próximo",
+            featuredCollection = "Colección General"
+        )
+        EventRepository.addEvent(newEvent)
+        _selectedEvent.value = newEvent
+    }
+}
+
+class CatalogViewModel : ViewModel() {
+    val products: StateFlow<List<MacrameProduct>> = CatalogRepository.products
+
+    private val _selectedCategory = MutableStateFlow("Todas")
+    val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    val filteredProducts: StateFlow<List<MacrameProduct>> = combine(
+        products,
+        _selectedCategory,
+        _searchQuery
+    ) { list, cat, query ->
+        list.filter { p ->
+            val matchesCat = cat == "Todas" || p.category.equals(cat, ignoreCase = true)
+            val matchesQuery = query.isBlank() ||
+                    p.name.contains(query, ignoreCase = true) ||
+                    p.materials.contains(query, ignoreCase = true) ||
+                    p.category.contains(query, ignoreCase = true)
+            matchesCat && matchesQuery
+        }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    val favoriteProducts: StateFlow<List<MacrameProduct>> = products.map { list ->
+        list.filter { it.isFavorite }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    fun setCategory(category: String) {
+        _selectedCategory.value = category
+    }
+
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
+
+    fun toggleFavorite(productId: String) {
+        CatalogRepository.toggleFavorite(productId)
+    }
+
+    fun getProductById(id: String): MacrameProduct? {
+        return CatalogRepository.getProductById(id)
+    }
+
+    fun getProductByQrCode(code: String): MacrameProduct? {
+        return CatalogRepository.getProductByQrCode(code)
+    }
+}
+
+class RequestViewModel : ViewModel() {
+    val allRequests: StateFlow<List<CustomRequest>> = RequestRepository.requests
+
+    fun getRequestsForUser(userId: String): List<CustomRequest> {
+        return allRequests.value.filter { it.userId == userId }
+    }
+
+    fun createRequest(
+        user: UserProfile,
+        eventType: String,
+        dimensions: String,
+        materialPreference: String,
+        colorPalette: String,
+        requiredDate: String,
+        comments: String
+    ): CustomRequest {
+        return RequestRepository.createRequest(
+            user = user,
+            eventType = eventType,
+            dimensions = dimensions,
+            materialPreference = materialPreference,
+            colorPalette = colorPalette,
+            requiredDate = requiredDate,
+            comments = comments
+        )
+    }
+
+    fun updateStatus(requestId: String, newStatus: String) {
+        RequestRepository.updateStatus(requestId, newStatus)
+    }
+}
+
+class NotificationViewModel : ViewModel() {
+    val notifications: StateFlow<List<AppNotification>> = NotificationRepository.notifications
+
+    val unreadCount: StateFlow<Int> = notifications.map { list ->
+        list.count { !it.isRead }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, 0)
+
+    fun markAsRead(id: String) {
+        NotificationRepository.markAsRead(id)
+    }
+
+    fun markAllAsRead() {
+        NotificationRepository.markAllAsRead()
+    }
+}
+
+class AdminViewModel : ViewModel() {
+    val campaigns: StateFlow<List<MacrameCampaign>> = CampaignRepository.campaigns
+    val scanHistory: StateFlow<List<QrScanHistoryItem>> = QrRepository.scanHistory
+
+    fun saveProduct(
+        id: String?,
+        name: String,
+        category: String,
+        price: Double,
+        description: String,
+        dimensions: String,
+        materials: String,
+        isAvailable: Boolean,
+        isCustomOrder: Boolean,
+        qrCodeId: String
+    ) {
+        val prodId = id ?: "prod_${System.currentTimeMillis()}"
+        val product = MacrameProduct(
+            id = prodId,
+            name = name,
+            category = category,
+            price = price,
+            description = description,
+            dimensions = dimensions,
+            materials = materials,
+            isAvailable = isAvailable,
+            isFavorite = false,
+            isCustomOrder = isCustomOrder,
+            qrCodeId = qrCodeId.ifBlank { "QR-$prodId" }
+        )
+        CatalogRepository.saveProduct(product)
+    }
+
+    fun createCampaign(
+        title: String,
+        subtitle: String,
+        category: String,
+        startDate: String,
+        endDate: String,
+        badgeText: String,
+        sendPush: Boolean
+    ) {
+        val campaign = MacrameCampaign(
+            id = "camp_${System.currentTimeMillis()}",
+            title = title,
+            subtitle = subtitle,
+            category = category,
+            startDate = startDate,
+            endDate = endDate,
+            isActive = true,
+            badgeText = badgeText
+        )
+        CampaignRepository.addCampaign(campaign)
+
+        if (sendPush) {
+            NotificationRepository.addNotification(
+                title = "🎉 $title",
+                message = subtitle,
+                type = "Campaña",
+                targetRoute = "catalog"
+            )
+        }
+    }
+
+    fun recordQrScan(qrCode: String): QrScanHistoryItem {
+        val product = CatalogRepository.getProductByQrCode(qrCode)
+        return QrRepository.recordScan(qrCode, product)
     }
 }

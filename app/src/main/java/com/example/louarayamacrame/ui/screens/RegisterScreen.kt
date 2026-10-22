@@ -65,18 +65,19 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.louarayamacrame.ui.theme.EarthenBrown
+import com.example.louarayamacrame.ui.theme.PurpleDark
+import com.example.louarayamacrame.ui.theme.PurplePrimary
 import com.example.louarayamacrame.ui.theme.SageGreen
-import com.example.louarayamacrame.ui.theme.TerracottaDark
 import com.example.louarayamacrame.ui.theme.TerracottaPrimary
 import com.example.louarayamacrame.ui.viewmodel.AuthViewModel
 
 data class AvatarOption(val id: String, val name: String, val iconText: String, val color: Color)
 
 val avatarOptions = listOf(
-    AvatarOption("avatar_1", "Hilo Terracota", "🧵", TerracottaPrimary),
-    AvatarOption("avatar_2", "Hoja Oliva", "🌿", SageGreen),
-    AvatarOption("avatar_3", "Madera Nativa", "🪵", EarthenBrown),
-    AvatarOption("avatar_4", "Nudo Dorado", "✨", TerracottaDark)
+    AvatarOption("avatar_1", "Amatista Violeta", "🔮", PurplePrimary),
+    AvatarOption("avatar_2", "Hilo Terracota", "🧵", TerracottaPrimary),
+    AvatarOption("avatar_3", "Hoja Oliva", "🌿", SageGreen),
+    AvatarOption("avatar_4", "Madera Nativa", "🪵", EarthenBrown)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -105,21 +106,22 @@ fun RegisterScreen(
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = null,
-                    tint = SageGreen,
-                    modifier = Modifier.size(48.dp)
+                    tint = PurplePrimary,
+                    modifier = Modifier.size(44.dp)
                 )
             },
             title = {
                 Text(
                     text = "¡Perfil Creado con Éxito!",
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 16.sp
                 )
             },
             text = {
                 Text(
-                    text = "Tu perfil de cliente ($alias) se ha guardado en la base de datos local. Ya puedes iniciar sesión para acceder a tus favoritos y solicitudes.",
-                    fontSize = 14.sp
+                    text = "Tu perfil ($alias) se ha guardado localmente. Ya puedes iniciar sesión para ver tus favoritos y solicitudes.",
+                    fontSize = 13.sp
                 )
             },
             confirmButton = {
@@ -128,7 +130,7 @@ fun RegisterScreen(
                         authViewModel.clearErrors()
                         onRegisterSuccessToLogin()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = TerracottaPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = PurplePrimary)
                 ) {
                     Text("Ir al Inicio de Sesión")
                 }
@@ -143,7 +145,7 @@ fun RegisterScreen(
                     Text(
                         text = "Registro de Cliente",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        fontSize = 17.sp
                     )
                 },
                 navigationIcon = {
@@ -171,35 +173,35 @@ fun RegisterScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Info Banner
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 20.dp),
-                    shape = RoundedCornerShape(16.dp),
+                        .padding(bottom = 14.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 ) {
                     Row(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = null,
-                            tint = TerracottaPrimary,
-                            modifier = Modifier.size(28.dp)
+                            tint = PurplePrimary,
+                            modifier = Modifier.size(24.dp)
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "Registra un perfil para personalizar tu experiencia. Puedes guardar varios perfiles en este mismo celular y mantener sus favoritos separados.",
+                            text = "Registra un perfil para personalizar tu experiencia. Puedes tener varios perfiles en este mismo celular.",
                             fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            lineHeight = 16.sp
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            lineHeight = 15.sp
                         )
                     }
                 }
@@ -208,17 +210,17 @@ fun RegisterScreen(
                 Text(
                     text = "Selecciona tu Avatar Artesanal",
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp,
+                    fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.align(Alignment.Start)
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 20.dp),
+                        .padding(bottom = 14.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     avatarOptions.forEach { avatar ->
@@ -229,11 +231,11 @@ fun RegisterScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(60.dp)
+                                    .size(52.dp)
                                     .clip(CircleShape)
-                                    .background(avatar.color.copy(alpha = if (isSelected) 0.25f else 0.1f))
+                                    .background(avatar.color.copy(alpha = if (isSelected) 0.22f else 0.08f))
                                     .border(
-                                        width = if (isSelected) 3.dp else 1.dp,
+                                        width = if (isSelected) 2.5.dp else 1.dp,
                                         color = if (isSelected) avatar.color else Color.LightGray,
                                         shape = CircleShape
                                     ),
@@ -241,13 +243,13 @@ fun RegisterScreen(
                             ) {
                                 Text(
                                     text = avatar.iconText,
-                                    fontSize = 28.sp
+                                    fontSize = 24.sp
                                 )
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = avatar.name,
-                                fontSize = 10.sp,
+                                fontSize = 9.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 color = if (isSelected) avatar.color else MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -260,18 +262,18 @@ fun RegisterScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 16.dp),
+                            .padding(bottom = 12.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.errorContainer
                         ),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(10.dp)
                     ) {
                         Text(
                             text = err,
                             color = MaterialTheme.colorScheme.onErrorContainer,
-                            fontSize = 13.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(12.dp)
+                            modifier = Modifier.padding(10.dp)
                         )
                     }
                 }
@@ -280,40 +282,40 @@ fun RegisterScreen(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Nombre Completo *") },
-                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                    label = { Text("Nombre Completo *", fontSize = 12.sp) },
+                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = PurplePrimary) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 12.dp),
+                        .padding(bottom = 10.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = TerracottaPrimary,
-                        focusedLabelColor = TerracottaPrimary
+                        focusedBorderColor = PurplePrimary,
+                        focusedLabelColor = PurplePrimary
                     )
                 )
 
                 OutlinedTextField(
                     value = alias,
                     onValueChange = { alias = it },
-                    label = { Text("Alias / Nombre de Usuario *") },
-                    leadingIcon = { Icon(Icons.Default.Tag, contentDescription = null) },
+                    label = { Text("Alias / Usuario *", fontSize = 12.sp) },
+                    leadingIcon = { Icon(Icons.Default.Tag, contentDescription = null, tint = PurplePrimary) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 12.dp),
+                        .padding(bottom = 10.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = TerracottaPrimary,
-                        focusedLabelColor = TerracottaPrimary
+                        focusedBorderColor = PurplePrimary,
+                        focusedLabelColor = PurplePrimary
                     )
                 )
 
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Correo Electrónico *") },
-                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                    label = { Text("Correo Electrónico *", fontSize = 12.sp) },
+                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = PurplePrimary) },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
@@ -321,36 +323,36 @@ fun RegisterScreen(
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 12.dp),
+                        .padding(bottom = 10.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = TerracottaPrimary,
-                        focusedLabelColor = TerracottaPrimary
+                        focusedBorderColor = PurplePrimary,
+                        focusedLabelColor = PurplePrimary
                     )
                 )
 
                 OutlinedTextField(
                     value = phone,
                     onValueChange = { phone = it },
-                    label = { Text("Teléfono de Contacto (+56 9...)") },
-                    leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
+                    label = { Text("Teléfono de Contacto", fontSize = 12.sp) },
+                    leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = PurplePrimary) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 12.dp),
+                        .padding(bottom = 10.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = TerracottaPrimary,
-                        focusedLabelColor = TerracottaPrimary
+                        focusedBorderColor = PurplePrimary,
+                        focusedLabelColor = PurplePrimary
                     )
                 )
 
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Contraseña (mín. 6 caracteres) *") },
-                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                    label = { Text("Contraseña (mín. 6 chars) *", fontSize = 12.sp) },
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = PurplePrimary) },
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
@@ -364,29 +366,29 @@ fun RegisterScreen(
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 12.dp),
+                        .padding(bottom = 10.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = TerracottaPrimary,
-                        focusedLabelColor = TerracottaPrimary
+                        focusedBorderColor = PurplePrimary,
+                        focusedLabelColor = PurplePrimary
                     )
                 )
 
                 OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
-                    label = { Text("Confirmar Contraseña *") },
-                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                    label = { Text("Confirmar Contraseña *", fontSize = 12.sp) },
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = PurplePrimary) },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 20.dp),
+                        .padding(bottom = 16.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = TerracottaPrimary,
-                        focusedLabelColor = TerracottaPrimary
+                        focusedBorderColor = PurplePrimary,
+                        focusedLabelColor = PurplePrimary
                     )
                 )
 
@@ -404,28 +406,28 @@ fun RegisterScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(16.dp),
+                        .height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = TerracottaPrimary,
+                        containerColor = PurplePrimary,
                         contentColor = Color.White
                     )
                 ) {
                     Text(
-                        text = "Guardar y Crear Perfil de Cliente",
-                        fontSize = 15.sp,
+                        text = "Guardar y Crear Perfil",
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 TextButton(onClick = onRegisterSuccessToLogin) {
                     Text(
                         text = "¿Ya tienes cuenta? Inicia Sesión aquí",
-                        fontSize = 13.sp,
-                        color = TerracottaDark,
-                        fontWeight = FontWeight.Medium
+                        fontSize = 12.sp,
+                        color = PurpleDark,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
