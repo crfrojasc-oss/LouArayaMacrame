@@ -323,6 +323,10 @@ object CatalogRepository {
             _products.value = listOf(product) + _products.value
         }
     }
+
+    fun deleteProduct(productId: String) {
+        _products.value = _products.value.filterNot { it.id == productId }
+    }
 }
 
 object RequestRepository {

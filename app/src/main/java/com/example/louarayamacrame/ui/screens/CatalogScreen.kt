@@ -175,14 +175,19 @@ fun CatalogScreen(
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                         contentPadding = PaddingValues(bottom = 16.dp)
                     ) {
-                        items(products) { product ->
-                            CatalogProductGridCard(
-                                product = product,
-                                isAdmin = isAdmin,
-                                onClick = { onProductSelected(product.id) },
-                                onToggleFav = { catalogViewModel.toggleFavorite(product.id) },
-                                onEdit = { onEditProduct(product.id) }
-                            )
+                        items(products, key = { it.id }) { product ->
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = true,
+                                enter = com.example.louarayamacrame.ui.theme.AnimationSpecs.FormEntryTransition
+                            ) {
+                                CatalogProductGridCard(
+                                    product = product,
+                                    isAdmin = isAdmin,
+                                    onClick = { onProductSelected(product.id) },
+                                    onToggleFav = { catalogViewModel.toggleFavorite(product.id) },
+                                    onEdit = { onEditProduct(product.id) }
+                                )
+                            }
                         }
                     }
                 }

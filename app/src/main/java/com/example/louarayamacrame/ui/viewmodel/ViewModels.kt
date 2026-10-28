@@ -351,6 +351,10 @@ class AdminViewModel : ViewModel() {
         CatalogRepository.saveProduct(product)
     }
 
+    fun deleteProduct(productId: String) {
+        CatalogRepository.deleteProduct(productId)
+    }
+
     fun createCampaign(
         title: String,
         subtitle: String,

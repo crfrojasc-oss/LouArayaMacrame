@@ -1,5 +1,6 @@
 package com.example.louarayamacrame.ui.screens
 
+import android.util.Patterns
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -56,6 +57,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -96,8 +98,69 @@ fun RegisterScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var selectedAvatar by remember { mutableStateOf(avatarOptions[0]) }
 
+    // Touched / Focus state for each field
+    var nameTouched by remember { mutableStateOf(false) }
+    var aliasTouched by remember { mutableStateOf(false) }
+    var emailTouched by remember { mutableStateOf(false) }
+    var phoneTouched by remember { mutableStateOf(false) }
+    var passwordTouched by remember { mutableStateOf(false) }
+    var confirmPasswordTouched by remember { mutableStateOf(false) }
+    var formSubmitted by remember { mutableStateOf(false) }
+
     val registerError by authViewModel.registerError.collectAsState()
     val registerSuccess by authViewModel.registerSuccess.collectAsState()
+
+    // Validation Functions
+    fun getNombreError(value: String): String? {
+        val trimmed = value.trim()
+        if (trimmed.isEmpty()) return "Este campo es obligatorio"
+        if (trimmed.length < 5) return "El nombre debe tener más de 4 caracteres"
+        return null
+    }
+
+    fun getAliasError(value: String): String? {
+        val trimmed = value.trim()
+        if (trimmed.isEmpty()) return "Este campo es obligatorio"
+        if (trimmed.length < 5) return "El alias debe tener más de 4 caracteres"
+        return null
+    }
+
+    fun getEmailError(value: String): String? {
+        val trimmed = value.trim()
+        if (trimmed.isEmpty()) return "Este campo es obligatorio"
+        if (!trimmed.contains("@") || !Patterns.EMAIL_ADDRESS.matcher(trimmed).matches()) {
+            return "Ingresa un correo válido"
+        }
+        return null
+    }
+
+    fun getPhoneError(value: String): String? {
+        val trimmed = value.trim()
+        if (trimmed.isEmpty()) return "Este campo es obligatorio"
+        if (trimmed.length != 9 || !trimmed.all { it.isDigit() }) {
+            return "El teléfono debe tener 9 dígitos"
+        }
+        return null
+    }
+
+    fun getPasswordError(value: String): String? {
+        if (value.isEmpty()) return "Este campo es obligatorio"
+        if (value.length < 7) return "La contraseña debe tener más de 6 caracteres"
+        return null
+    }
+
+    fun getConfirmPasswordError(value: String, pass: String): String? {
+        if (value.isEmpty()) return "Este campo es obligatorio"
+        if (value != pass) return "Las contraseñas no coinciden"
+        return null
+    }
+
+    val nombreError = getNombreError(name)
+    val aliasError = getAliasError(alias)
+    val emailError = getEmailError(email)
+    val phoneError = getPhoneError(phone)
+    val passwordError = getPasswordError(password)
+    val confirmPasswordError = getConfirmPasswordError(confirmPassword, password)
 
     if (registerSuccess) {
         AlertDialog(
@@ -257,101 +320,160 @@ fun RegisterScreen(
                     }
                 }
 
-                // Error Display
-                registerError?.let { err ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        ),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text(
-                            text = err,
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(10.dp)
-                        )
-                    }
-                }
-
-                // Form Fields
+                // Field 1: Nombre
+                val showNombreErr = (nameTouched || formSubmitted) && nombreError != null
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Nombre Completo *", fontSize = 12.sp) },
+                    onValueChange = {
+                        name = it
+                        nameTouched = true
+                    },
+                    label = { Text("Nombre Completo", fontSize = 12.sp) },
                     leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = PurplePrimary) },
                     singleLine = true,
+                    isError = showNombreErr,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 10.dp),
+                        .onFocusChanged { if (!it.isFocused && name.isNotEmpty()) nameTouched = true },
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PurplePrimary,
                         focusedLabelColor = PurplePrimary
                     )
                 )
+                if (showNombreErr && nombreError != null) {
+                    Text(
+                        text = nombreError,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 4.dp, top = 2.dp, bottom = 4.dp)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
+                // Field 2: Alias
+                val showAliasErr = (aliasTouched || formSubmitted) && aliasError != null
                 OutlinedTextField(
                     value = alias,
-                    onValueChange = { alias = it },
-                    label = { Text("Alias / Usuario *", fontSize = 12.sp) },
+                    onValueChange = {
+                        alias = it
+                        aliasTouched = true
+                    },
+                    label = { Text("Alias / Usuario", fontSize = 12.sp) },
                     leadingIcon = { Icon(Icons.Default.Tag, contentDescription = null, tint = PurplePrimary) },
                     singleLine = true,
+                    isError = showAliasErr,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 10.dp),
+                        .onFocusChanged { if (!it.isFocused && alias.isNotEmpty()) aliasTouched = true },
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PurplePrimary,
                         focusedLabelColor = PurplePrimary
                     )
                 )
+                if (showAliasErr && aliasError != null) {
+                    Text(
+                        text = aliasError,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 4.dp, top = 2.dp, bottom = 4.dp)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
+                // Field 3: Email
+                val showEmailErr = (emailTouched || formSubmitted) && emailError != null
                 OutlinedTextField(
                     value = email,
-                    onValueChange = { email = it },
-                    label = { Text("Correo Electrónico *", fontSize = 12.sp) },
+                    onValueChange = {
+                        email = it
+                        emailTouched = true
+                    },
+                    label = { Text("Correo Electrónico", fontSize = 12.sp) },
                     leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = PurplePrimary) },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
                     ),
                     singleLine = true,
+                    isError = showEmailErr,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 10.dp),
+                        .onFocusChanged { if (!it.isFocused && email.isNotEmpty()) emailTouched = true },
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PurplePrimary,
                         focusedLabelColor = PurplePrimary
                     )
                 )
+                if (showEmailErr && emailError != null) {
+                    Text(
+                        text = emailError,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 4.dp, top = 2.dp, bottom = 4.dp)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
+                // Field 4: Teléfono
+                val showPhoneErr = (phoneTouched || formSubmitted) && phoneError != null
                 OutlinedTextField(
                     value = phone,
-                    onValueChange = { phone = it },
+                    onValueChange = {
+                        phone = it
+                        phoneTouched = true
+                    },
                     label = { Text("Teléfono de Contacto", fontSize = 12.sp) },
                     leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = PurplePrimary) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     singleLine = true,
+                    isError = showPhoneErr,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 10.dp),
+                        .onFocusChanged { if (!it.isFocused && phone.isNotEmpty()) phoneTouched = true },
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PurplePrimary,
                         focusedLabelColor = PurplePrimary
                     )
                 )
+                if (showPhoneErr && phoneError != null) {
+                    Text(
+                        text = phoneError,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 4.dp, top = 2.dp, bottom = 4.dp)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
+                // Field 5: Contraseña
+                val showPasswordErr = (passwordTouched || formSubmitted) && passwordError != null
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Contraseña (mín. 6 chars) *", fontSize = 12.sp) },
+                    onValueChange = {
+                        password = it
+                        passwordTouched = true
+                    },
+                    label = { Text("Contraseña", fontSize = 12.sp) },
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = PurplePrimary) },
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -364,45 +486,104 @@ fun RegisterScreen(
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     singleLine = true,
+                    isError = showPasswordErr,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 10.dp),
+                        .onFocusChanged { if (!it.isFocused && password.isNotEmpty()) passwordTouched = true },
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PurplePrimary,
                         focusedLabelColor = PurplePrimary
                     )
                 )
+                if (showPasswordErr && passwordError != null) {
+                    Text(
+                        text = passwordError,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 4.dp, top = 2.dp, bottom = 4.dp)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
+                // Field 6: Confirmar Contraseña
+                val showConfirmPasswordErr = (confirmPasswordTouched || formSubmitted) && confirmPasswordError != null
                 OutlinedTextField(
                     value = confirmPassword,
-                    onValueChange = { confirmPassword = it },
-                    label = { Text("Confirmar Contraseña *", fontSize = 12.sp) },
+                    onValueChange = {
+                        confirmPassword = it
+                        confirmPasswordTouched = true
+                    },
+                    label = { Text("Confirmar Contraseña", fontSize = 12.sp) },
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = PurplePrimary) },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     singleLine = true,
+                    isError = showConfirmPasswordErr,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp),
+                        .onFocusChanged { if (!it.isFocused && confirmPassword.isNotEmpty()) confirmPasswordTouched = true },
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PurplePrimary,
                         focusedLabelColor = PurplePrimary
                     )
                 )
+                if (showConfirmPasswordErr && confirmPasswordError != null) {
+                    Text(
+                        text = confirmPasswordError,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 4.dp, top = 2.dp, bottom = 4.dp)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(14.dp))
+                }
+
+                // Global Auth ViewModel Error Display (e.g. Duplicate User)
+                registerError?.let { err ->
+                    Text(
+                        text = err,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp)
+                    )
+                }
 
                 Button(
                     onClick = {
-                        authViewModel.register(
-                            name = name,
-                            alias = alias,
-                            email = email,
-                            password = password,
-                            confirmPassword = confirmPassword,
-                            phone = phone,
-                            avatarId = selectedAvatar.id
-                        )
+                        formSubmitted = true
+                        nameTouched = true
+                        aliasTouched = true
+                        emailTouched = true
+                        phoneTouched = true
+                        passwordTouched = true
+                        confirmPasswordTouched = true
+
+                        val hasAnyError = nombreError != null || aliasError != null || emailError != null ||
+                                phoneError != null || passwordError != null || confirmPasswordError != null
+
+                        if (!hasAnyError) {
+                            authViewModel.register(
+                                name = name,
+                                alias = alias,
+                                email = email,
+                                password = password,
+                                confirmPassword = confirmPassword,
+                                phone = phone,
+                                avatarId = selectedAvatar.id
+                            )
+                        }
                     },
                     modifier = Modifier
                         .fillMaxWidth()

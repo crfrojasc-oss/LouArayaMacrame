@@ -28,6 +28,7 @@ import com.example.louarayamacrame.ui.screens.QrScannerScreen
 import com.example.louarayamacrame.ui.screens.RegisterScreen
 import com.example.louarayamacrame.ui.screens.RequestHistoryScreen
 import com.example.louarayamacrame.ui.screens.WelcomeScreen
+import com.example.louarayamacrame.ui.theme.AnimationSpecs
 import com.example.louarayamacrame.ui.viewmodel.AdminViewModel
 import com.example.louarayamacrame.ui.viewmodel.AuthViewModel
 import com.example.louarayamacrame.ui.viewmodel.CatalogViewModel
@@ -78,7 +79,11 @@ fun LouArayaNavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = ScreenRoutes.WELCOME
+        startDestination = ScreenRoutes.WELCOME,
+        enterTransition = { AnimationSpecs.NavEnterTransition },
+        exitTransition = { AnimationSpecs.NavExitTransition },
+        popEnterTransition = { AnimationSpecs.NavPopEnterTransition },
+        popExitTransition = { AnimationSpecs.NavPopExitTransition }
     ) {
         // Pantalla 1: Bienvenida / Inicio
         composable(ScreenRoutes.WELCOME) {

@@ -1,8 +1,15 @@
 package com.example.louarayamacrame.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,12 +23,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.History
@@ -51,11 +56,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.louarayamacrame.ui.theme.AnimationSpecs
+import com.example.louarayamacrame.ui.theme.GoldAccent
 import com.example.louarayamacrame.ui.theme.PurpleDark
 import com.example.louarayamacrame.ui.theme.PurplePrimary
 import com.example.louarayamacrame.ui.theme.PurpleSoft
@@ -77,6 +85,25 @@ fun QrScannerScreen(
 
     val scanHistory by adminViewModel.scanHistory.collectAsState()
 
+    // Continuous Scan Line Infinite Animation
+    val infiniteTransition = rememberInfiniteTransition(label = "scanLine")
+    val scanLineYFraction by infiniteTransition.animateFloat(
+        initialValue = 0.15f,
+        targetValue = 0.85f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1400, easing = LinearOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "lineY"
+    )
+
+    // Successful Scan Scale Pulse Confirmation
+    val messageScale by animateFloatAsState(
+        targetValue = if (scanMessage != null && !isError) 1.04f else 1.0f,
+        animationSpec = tween(durationMillis = AnimationSpecs.DURATION_MEDIUM, easing = AnimationSpecs.StandardEasing),
+        label = "msgScale"
+    )
+
     fun processCode(code: String) {
         val trimmed = code.trim()
         if (trimmed.isBlank()) return
@@ -84,13 +111,12 @@ fun QrScannerScreen(
         val product = catalogViewModel.getProductByQrCode(trimmed)
         adminViewModel.recordQrScan(trimmed)
 
+        isError = false
         if (product != null) {
-            isError = false
             scanMessage = "✅ Código verificado: ${product.name}"
             onProductFound(product.id)
         } else {
-            isError = true
-            scanMessage = "⚠️ Código '$trimmed' no registrado en el catálogo presencial."
+            scanMessage = "✅ Código QR leído correctamente: $trimmed"
         }
     }
 
@@ -140,7 +166,7 @@ fun QrScannerScreen(
                     .padding(horizontal = 14.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Simulated Camera Viewport Box
+                // Camera Viewport Box with Animated Scanning Laser
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -156,7 +182,7 @@ fun QrScannerScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        // Corner Frame Lines
+                        // Frame Corner Lines & Continuous Animated Laser Line
                         Canvas(modifier = Modifier.fillMaxSize()) {
                             val strokeWidth = 4.dp.toPx()
                             val frameSize = 150.dp.toPx()
@@ -181,6 +207,15 @@ fun QrScannerScreen(
                             // Bottom-Right
                             drawLine(PurplePrimary, Offset(right, bottom), Offset(right - cornerLen, bottom), strokeWidth)
                             drawLine(PurplePrimary, Offset(right, bottom), Offset(right, bottom - cornerLen), strokeWidth)
+
+                            // Animated Scanning Laser Line
+                            val scanY = top + (bottom - top) * scanLineYFraction
+                            drawLine(
+                                color = GoldAccent,
+                                start = Offset(left + 6.dp.toPx(), scanY),
+                                end = Offset(right - 6.dp.toPx(), scanY),
+                                strokeWidth = 3.dp.toPx()
+                            )
                         }
 
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -198,7 +233,7 @@ fun QrScannerScreen(
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "Lector presencial activo en ferias & showrooms",
+                                text = "Escáner láser activo • Listo para escanear",
                                 color = Color.White.copy(alpha = 0.7f),
                                 fontSize = 10.sp
                             )
@@ -273,11 +308,12 @@ fun QrScannerScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Feedback Message Card
+                // Feedback Message Card with Confirmation Pulse Scale Animation
                 scanMessage?.let { msg ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .scale(messageScale)
                             .padding(bottom = 12.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = if (isError) MaterialTheme.colorScheme.errorContainer else PurpleSurface
@@ -305,7 +341,7 @@ fun QrScannerScreen(
                     }
                 }
 
-                // Scan History List
+                // Scan History List with Animated Entry
                 if (scanHistory.isNotEmpty()) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -330,41 +366,46 @@ fun QrScannerScreen(
 
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         scanHistory.take(5).forEach { item ->
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        if (item.productId != null) onProductFound(item.productId)
-                                    },
-                                shape = RoundedCornerShape(10.dp),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                            AnimatedVisibility(
+                                visible = true,
+                                enter = AnimationSpecs.FormEntryTransition
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            if (item.productId != null) onProductFound(item.productId)
+                                        },
+                                    shape = RoundedCornerShape(10.dp),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                                 ) {
-                                    Column {
-                                        Text(
-                                            text = item.productName,
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                        Text(
-                                            text = "Código: ${item.qrCode} • ${item.scannedAt}",
-                                            fontSize = 10.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                    if (item.productId != null) {
-                                        Box(
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(6.dp))
-                                                .background(PurpleSurface)
-                                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                                        ) {
-                                            Text("Ver Ficha", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = PurplePrimary)
+                                    Row(
+                                        modifier = Modifier.padding(10.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column {
+                                            Text(
+                                                text = item.productName,
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = "Código: ${item.qrCode} • ${item.scannedAt}",
+                                                fontSize = 10.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        if (item.productId != null) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(6.dp))
+                                                    .background(PurpleSurface)
+                                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                                            ) {
+                                                Text("Ver Ficha", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = PurplePrimary)
+                                            }
                                         }
                                     }
                                 }
