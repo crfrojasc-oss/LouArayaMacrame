@@ -45,7 +45,6 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.Storefront
-import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -193,7 +192,7 @@ fun rememberMapView(): MapView {
         config.load(context, context.getSharedPreferences("osmdroid_prefs", Context.MODE_PRIVATE))
 
         MapView(context).apply {
-            setTileSource(CARTO_VOYAGER_TILE_SOURCE)
+            setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
             isTilesScaledToDpi = true
             zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)

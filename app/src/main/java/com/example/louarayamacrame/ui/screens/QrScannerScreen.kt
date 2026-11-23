@@ -1,5 +1,15 @@
 package com.example.louarayamacrame.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.util.Size
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -48,6 +58,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,9 +71,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.louarayamacrame.ui.theme.AnimationSpecs
 import com.example.louarayamacrame.ui.theme.GoldAccent
 import com.example.louarayamacrame.ui.theme.PurpleDark
@@ -70,6 +86,9 @@ import com.example.louarayamacrame.ui.theme.PurpleSoft
 import com.example.louarayamacrame.ui.theme.PurpleSurface
 import com.example.louarayamacrame.ui.viewmodel.AdminViewModel
 import com.example.louarayamacrame.ui.viewmodel.CatalogViewModel
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.common.InputImage
+import java.util.concurrent.Executors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,6 +98,26 @@ fun QrScannerScreen(
     onNavigateBack: () -> Unit,
     onProductFound: (String) -> Unit
 ) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { granted -> hasCameraPermission = granted }
+    )
+
+    LaunchedEffect(Unit) {
+        if (!hasCameraPermission) {
+            launcher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
     var manualCodeInput by remember { mutableStateOf("") }
     var scanMessage by remember { mutableStateOf<String?>(null) }
     var isError by remember { mutableStateOf(false) }
@@ -97,7 +136,6 @@ fun QrScannerScreen(
         label = "lineY"
     )
 
-    // Successful Scan Scale Pulse Confirmation
     val messageScale by animateFloatAsState(
         targetValue = if (scanMessage != null && !isError) 1.04f else 1.0f,
         animationSpec = tween(durationMillis = AnimationSpecs.DURATION_MEDIUM, easing = AnimationSpecs.StandardEasing),
@@ -139,7 +177,7 @@ fun QrScannerScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Toggle Flash Demo */ }) {
+                    IconButton(onClick = { /* Torch toggle if needed */ }) {
                         Icon(
                             imageVector = Icons.Default.FlashOn,
                             contentDescription = "Linterna",
@@ -166,23 +204,85 @@ fun QrScannerScreen(
                     .padding(horizontal = 14.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Camera Viewport Box with Animated Scanning Laser
+                // Live CameraX Viewport Box with MLKit Scanning & Animated Laser
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(230.dp)
                         .padding(bottom = 12.dp),
                     shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF1E1428)
-                    ),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1428)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        // Frame Corner Lines & Continuous Animated Laser Line
+                        if (hasCameraPermission) {
+                            AndroidView(
+                                factory = { ctx ->
+                                    val previewView = PreviewView(ctx)
+                                    val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
+                                    val executor = ContextCompat.getMainExecutor(ctx)
+
+                                    cameraProviderFuture.addListener({
+                                        val cameraProvider = cameraProviderFuture.get()
+                                        val preview = Preview.Builder().build().also {
+                                            it.setSurfaceProvider(previewView.surfaceProvider)
+                                        }
+
+                                        val scanner = BarcodeScanning.getClient()
+                                        val analysisExecutor = Executors.newSingleThreadExecutor()
+
+                                        val imageAnalysis = ImageAnalysis.Builder()
+                                            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                                            .build()
+
+                                        imageAnalysis.setAnalyzer(analysisExecutor) { imageProxy ->
+                                            @Suppress("UnsafeOptInUsageError")
+                                            val mediaImage = imageProxy.image
+                                            if (mediaImage != null) {
+                                                val image = InputImage.fromMediaImage(
+                                                    mediaImage,
+                                                    imageProxy.imageInfo.rotationDegrees
+                                                )
+                                                scanner.process(image)
+                                                    .addOnSuccessListener { barcodes ->
+                                                        for (barcode in barcodes) {
+                                                            barcode.rawValue?.let { code ->
+                                                                processCode(code)
+                                                            }
+                                                        }
+                                                    }
+                                                    .addOnCompleteListener {
+                                                        imageProxy.close()
+                                                    }
+                                            } else {
+                                                imageProxy.close()
+                                            }
+                                        }
+
+                                        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                                        try {
+                                            cameraProvider.unbindAll()
+                                            cameraProvider.bindToLifecycle(
+                                                lifecycleOwner,
+                                                cameraSelector,
+                                                preview,
+                                                imageAnalysis
+                                            )
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                        }
+                                    }, executor)
+
+                                    previewView
+                                },
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+
+                        // Overlay Scanning Frame & Laser Line
                         Canvas(modifier = Modifier.fillMaxSize()) {
                             val strokeWidth = 4.dp.toPx()
                             val frameSize = 150.dp.toPx()
@@ -192,23 +292,18 @@ fun QrScannerScreen(
                             val bottom = top + frameSize
                             val cornerLen = 24.dp.toPx()
 
-                            // Top-Left
                             drawLine(PurplePrimary, Offset(left, top), Offset(left + cornerLen, top), strokeWidth)
                             drawLine(PurplePrimary, Offset(left, top), Offset(left, top + cornerLen), strokeWidth)
 
-                            // Top-Right
                             drawLine(PurplePrimary, Offset(right, top), Offset(right - cornerLen, top), strokeWidth)
                             drawLine(PurplePrimary, Offset(right, top), Offset(right, top + cornerLen), strokeWidth)
 
-                            // Bottom-Left
                             drawLine(PurplePrimary, Offset(left, bottom), Offset(left + cornerLen, bottom), strokeWidth)
                             drawLine(PurplePrimary, Offset(left, bottom), Offset(left, bottom - cornerLen), strokeWidth)
 
-                            // Bottom-Right
                             drawLine(PurplePrimary, Offset(right, bottom), Offset(right - cornerLen, bottom), strokeWidth)
                             drawLine(PurplePrimary, Offset(right, bottom), Offset(right, bottom - cornerLen), strokeWidth)
 
-                            // Animated Scanning Laser Line
                             val scanY = top + (bottom - top) * scanLineYFraction
                             drawLine(
                                 color = GoldAccent,
@@ -218,32 +313,33 @@ fun QrScannerScreen(
                             )
                         }
 
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                imageVector = Icons.Default.QrCodeScanner,
-                                contentDescription = null,
-                                tint = PurpleSoft,
-                                modifier = Modifier.size(48.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Apunta la cámara a la etiqueta QR",
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "Escáner láser activo • Listo para escanear",
-                                color = Color.White.copy(alpha = 0.7f),
-                                fontSize = 10.sp
-                            )
+                        if (!hasCameraPermission) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    imageVector = Icons.Default.QrCodeScanner,
+                                    contentDescription = null,
+                                    tint = PurpleSoft,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Permiso de cámara requerido",
+                                    color = Color.White,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Toca para otorgar permisos de cámara",
+                                    color = Color.White.copy(alpha = 0.7f),
+                                    fontSize = 10.sp
+                                )
+                            }
                         }
                     }
                 }
 
-                // Scan Simulation Buttons
                 Text(
-                    text = "Probar Lectura de Etiquetas Ficticias (Demo MVP)",
+                    text = "Lectura de Código QR (Cámara Activa)",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -277,7 +373,6 @@ fun QrScannerScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Manual Input
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -308,7 +403,6 @@ fun QrScannerScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Feedback Message Card with Confirmation Pulse Scale Animation
                 scanMessage?.let { msg ->
                     Card(
                         modifier = Modifier
@@ -341,7 +435,6 @@ fun QrScannerScreen(
                     }
                 }
 
-                // Scan History List with Animated Entry
                 if (scanHistory.isNotEmpty()) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
